@@ -1,47 +1,26 @@
 ---
 doc_id: BUILD-PROGRESS
-document: Build Progress and Resume State
-purpose: Own current delivered capability, verification evidence, release limits and the implementation backlog.
-audience: AI engineering agent
-status: current implementation summary followed by historical milestone evidence
+document: Build progress and submission handoff
+purpose: Own implementation status and verification evidence.
 as_of: '2026-11-17'
 ---
 
-# Build Progress
+# Build progress
 
-## Current implementation status — 2026-11-17
+## Current implementation status
 
-**This section owns current delivered capability and backlog.** Below it is dated historical evidence,
-not competing instructions. [SAVE_POINT](../memory/SAVE_POINT.md) owns active unfinished work only;
-[SESSIONS](../memory/SESSIONS.md) is chronology. A backlog does not authorize starting it.
+The offline CLI generates the full STAR STRUCK possession CSV from the tactical tracking and
+automatic tags. The method, sources and reproduction instructions are in the
+[technical report](../../TECHNICAL_REPORT.md). Only local dataset paths are needed.
 
-**Delivered:** the repository scaffold only. Entry files, source-of-truth layout, the quality contract,
-chunked memory with a save-point skill, the ADR set, the execution contract and the commit-identity
-hooks. No product capability exists.
-No toolchain or CI exists yet: B0 chooses one, records it as an ADR and fills the commands in
-[CONSTRAINTS](../CONSTRAINTS.md) before any other work.
+| Slice | Outcome |
+|---|---|
+| B0 | Python 3.12.14 and NumPy locked. The local check and audit run. A workflow is defined for GitHub CI. |
+| B1 | Geometry, motion, tags and temporal decoding implemented. Synthetic tests pass with 94.25% coverage. |
+| B2 | Official baseline reproduced byte for byte. Development and external holdout checks complete. |
+| B3 | The organizer's validator accepted the named 199,319-row CSV. A clean checkout at `ce15511` reproduced it byte for byte. |
+| B4 | Team-named CSV and technical report available locally under the ignored outputs directory. |
 
-**Verified revision:** the first commit. The first-commit check results are recorded in
-[SESSIONS](../memory/SESSIONS.md) by the session that ran them.
-
-**Disabled and why:** everything product-facing. Nothing is built; nothing is represented by a skipped
-passing test.
-
-**Known limits:** the product pack in `product context/` and the business README are empty templates
-until Mohib fills them. The slice plan below is a proposal until ratified.
-
-**Authorized next:** nothing beyond the scaffold. B0 completes when the verification pipeline has been
-watched failing on a deliberate bad input, and Mohib has agreed the slice plan.
-
-## Slice plan (proposal — see the execution contract for exit criteria)
-
-| Slice | Scope | Status |
-|---|---|---|
-| B0 | Reproducible workspace and verification pipeline; synthetic data only | scaffolded, gates not yet watched failing |
-| B1 | Executable core semantics and, where it carries rules, an independent oracle | not started |
-| B2 | Security and tenancy irreversibles, before any real data | not started |
-| B3 | One end-to-end synthetic path with a real UI | not started |
-| B4 | Fake external effects through reconciliation | not started |
-| B5 | One design-partner cohort, human-reviewed | not started |
-
-Adapt the slice names to the product; keep the ordering logic (see the execution contract).
+The [validation record](reviews/2026-11-17-qualifier-validation.md) owns the evidence and
+limitations. The local source repository has no remote. Publishing it and using the submission
+form require the owner's authorization. The exact cutoff hour remains open.

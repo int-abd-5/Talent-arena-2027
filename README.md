@@ -33,8 +33,11 @@ uv run --locked python ../more-than-a-hack-2027/evaluation/validate_submission.p
 ```
 
 The reproduction command needs only the three files above. The [public DFL benchmark](app/tools/DFL_BENCHMARK.md)
-is available separately for external replication. `make check` runs synthetic coverage, repository
-checks, formatting, lint and types. `make audit` checks locked runtime dependencies.
+is available separately for external replication. See the
+[validation record](app/technical%20context/reviews/2026-11-17-qualifier-validation.md) and
+[development decisions](app/technical%20context/adr/0002-temporal-possession.md) for the evidence.
+`make check` runs synthetic coverage, repository checks, formatting, lint and types.
+`make audit` checks locked runtime dependencies.
 
 Keep the match files, working exports and possession CSVs in ignored local folders. The organizer
 accepts the named CSV, a public source repository URL, and the named technical report through its

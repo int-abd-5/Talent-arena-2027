@@ -25,3 +25,8 @@ quality contract, memory, ADR-0001, execution contract and commit-identity hooks
 | Commit | What |
 |---|---|
 | first commit | The scaffold. Look up the hash with `git log --reverse --format=%h -1` |
+
+**Qualifier package.** The CLI, external benchmark and regression cases were completed on
+17 November. The official validator and a clean checkout verified the named output. Read the
+[validation record](../technical%20context/reviews/2026-11-17-qualifier-validation.md) for the
+revision, measurements and remaining release steps.
