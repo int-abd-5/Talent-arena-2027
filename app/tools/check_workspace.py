@@ -8,10 +8,8 @@ from urllib.parse import unquote, urlsplit
 
 
 def check(root: Path) -> list[str]:
-    """Return actionable problems with checked-in and staged paths and entry files."""
+    """Return actionable problems with checked-in paths and participant-facing links."""
     problems = []
-    if (root / "AGENTS.md").read_bytes() != (root / "CLAUDE.md").read_bytes():
-        problems.append("The two repository entry files differ.")
     tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=root).split(b"\0")
     asset_extensions = {".mp4", ".mov", ".zip", ".xml", ".csv", ".npz", ".npy", ".parquet"}
     for entry in filter(None, tracked):

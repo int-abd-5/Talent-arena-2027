@@ -13,9 +13,6 @@ playwright-report/
 # graphify builds this from the tree; it is derived data and rebuildable
 graphify-out/
 
-# The desktop app's session worktrees. .claude/ also holds tracked skills, so a
-# `git add .claude` must never sweep a whole worktree checkout into a commit.
-.claude/worktrees/
 
 # Local competition data, other-match benchmarks, and submission artifacts.
 /data/
