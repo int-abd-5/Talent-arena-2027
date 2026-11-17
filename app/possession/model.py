@@ -120,13 +120,19 @@ def predict_half(
     # secondary evidence that play stopped, or geometry when a ball exit was observed.
     slowing = evidence.slow_players * np.maximum(evidence.still_ball, evidence.missing)
     restart_pause = restart * np.maximum(still_near_line, slowing)
-    live = 0.04 + 0.37 * moving_inside + 0.19 * strongest + 0.15 * evidence.active_players
+    stop_support = np.maximum(evidence.outside, np.maximum(still_near_line, slowing))
+    live = (
+        0.04 * evidence.ball_reliability
+        + 0.37 * moving_inside
+        + 0.19 * strongest
+        + 0.15 * evidence.active_players
+    )
     dead = (
         1.50 * evidence.outside
         + 0.58 * still_near_line
         + 0.50 * slowing
         + 0.35 * restart_pause
-        + stoppage_bias
+        + stoppage_bias * stop_support
     )
     # An approximate phase can break an evidence tie but carries much less weight than control.
     team_prior = 0.13 * phase * (1 - np.abs(margin))
@@ -139,6 +145,5 @@ def predict_half(
     restart_support = np.maximum(control, (0.70 * moving_inside)[:, None])
     enter_live = stoppage_penalty * timescale * (1.50 - 0.80 * restart_support)
     enter_live *= (1 - 0.30 * restart * moving_inside)[:, None]
-    stop_support = np.maximum(evidence.outside, np.maximum(still_near_line, slowing))
     enter_dead = stoppage_penalty * timescale * (1.55 - 0.75 * stop_support)
     return _decode(emissions, switch_team, enter_live, enter_dead)

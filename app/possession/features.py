@@ -13,6 +13,7 @@ class Evidence:
     """Per-frame evidence in [0, 1] for the three-state decoder."""
 
     control: FloatArray
+    ball_reliability: FloatArray
     moving_ball: FloatArray
     still_ball: FloatArray
     outside: FloatArray
@@ -24,6 +25,43 @@ class Evidence:
 
 def _distance(vector: FloatArray) -> FloatArray:
     return np.sqrt(np.sum(vector * vector, axis=-1))
+
+
+def opening_frame(
+    ball_xy: FloatArray,
+    windows: tuple[tuple[int, int], ...],
+    start: int,
+    stop: int,
+    pitch: tuple[float, float],
+    fps: float,
+) -> int:
+    """Estimate the start of play when an automatic opening tag follows the graded start."""
+    lookahead = max(1, round(0.24 * fps))
+    # Match only an opening tag near the beginning of this half. Post-goal kickoffs are excluded
+    # by the tag reader. The public graded clock can start before the ball has been kicked.
+    latest_opening = min(stop, start + round(180 * fps))
+    for tag_start, tag_stop in windows:
+        if tag_stop <= start or tag_start >= latest_opening:
+            continue
+        if tag_start <= start:
+            return start
+
+        frames = np.arange(tag_start, min(tag_stop, stop - lookahead))
+        size = np.asarray(pitch, dtype=np.float32)
+        points = ball_xy[frames] * size
+        center_distance = _distance(points - size / 2)
+        step_speed = _distance(points - ball_xy[frames - 1] * size) * fps
+        forward_speed = _distance(ball_xy[frames + lookahead] * size - points) * fps / lookahead
+        candidates = frames[
+            (center_distance <= 3)
+            & (step_speed >= 1)
+            & (step_speed <= 40)
+            & (forward_speed >= 2)
+            & (forward_speed <= 32)
+        ]
+        # If the kickoff is occluded, the leading edge of its tag conservatively ends the prefix.
+        return int(candidates[0]) if len(candidates) else tag_start
+    return start
 
 
 def _motion(
@@ -141,5 +179,13 @@ def build_evidence(
     moving_ball = np.nan_to_num(np.clip((ball_speed - 0.9) / 3.4, 0, 1)) * reliability
     still_ball = np.nan_to_num(np.clip((1.0 - ball_speed) / 0.8, 0, 1)) * reliability
     return Evidence(
-        control, moving_ball, still_ball, outside, near_line, missing, slow_players, active_players
+        control,
+        reliability,
+        moving_ball,
+        still_ball,
+        outside,
+        near_line,
+        missing,
+        slow_players,
+        active_players,
     )

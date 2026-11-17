@@ -50,10 +50,11 @@ def test_rejects_malformed_tracking(tmp_path: Path, line: str, reason: str) -> N
         read_tracking(tactical / ATD_METADATA, tactical / ATD_TRACKING, n_frames=1)
 
 
-def _tag(start: float, end: float, code: str, team: str) -> str:
+def _tag(start: float, end: float, code: str, team: str, kind: str = "") -> str:
     return (
         f"<instance><start>{start}</start><end>{end}</end><code>{code}</code>"
-        f"<label><group>Team</group><text>{team}</text></label></instance>"
+        f"<label><group>Team</group><text>{team}</text></label>"
+        f"<label><group>Type</group><text>{kind}</text></label></instance>"
     )
 
 
@@ -138,3 +139,37 @@ def test_inference_rejects_invalid_tag_and_team_shapes() -> None:
         predict_half(players, ball, np.array([0, 0]), pitch)
     with pytest.raises(ValueError, match="finite value per frame"):
         predict_half(players, ball, np.array([0, 1]), pitch, phase_bias=np.zeros(3))
+
+
+def test_uninformative_long_gap_preserves_live_play() -> None:
+    """A decoder bias cannot create a stoppage when every observation is missing."""
+    n_frames = 2_000
+    players = np.full((n_frames, 2, 2), np.nan)
+    ball = np.full((n_frames, 2), np.nan)
+    for block in (slice(0, 200), slice(1_800, n_frames)):
+        players[block, 0] = (0.30, 0.50)
+        players[block, 1] = (0.70, 0.50)
+        ball[block] = (0.30, 0.50)
+    labels = predict_half(players, ball, np.array([0, 1]), (105.3, 68.0))
+    assert np.all(labels == "H")
+
+
+def test_opening_restart_ends_the_graded_dead_prefix(tmp_path: Path) -> None:
+    """Use the tracking and automatic opening tag when a half is graded before kickoff."""
+    tactical = _bundle(tmp_path, n_frames=250)
+    (tactical / SMART_TAGGING).write_text(
+        "<file>" + _tag(6.2, 8.6, "SET PIECES", "Athletic Club", "Kick Off (Start)") + "</file>"
+    )
+    rows = []
+    for frame in range(250):
+        x = 0.50 + min(10, max(0, frame - 170)) * 0.001 if frame >= 100 else 0.30
+        slots = f"0.30,0.50,0;{x},0.50,0"
+        rows.append(f"{frame + 1}:{slots}:{x},0.50,NaN\n")
+    (tactical / ATD_TRACKING).write_text("".join(rows))
+    target = tmp_path / "submission.csv"
+    generate(tmp_path, target, MatchLayout(250, (slice(0, 80), slice(100, 240))))
+    with target.open(newline="") as stream:
+        labels = [row["label"] for row in csv.DictReader(stream)]
+    assert labels[80:100] == ["X"] * 20
+    assert labels[100:170] == ["D"] * 70
+    assert labels[172:240] == ["A"] * 68

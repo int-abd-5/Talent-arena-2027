@@ -18,6 +18,10 @@ spell or a missed stoppage can cost a match even when most individual frames are
 | Stoppages and restarts | Ball position beyond the pitch, stationarity near a line and slow collective movement favor a stoppage. A set-piece tag supports a restart when ball motion resumes. |
 | Automatic phases | Taper each tag at its edges. Bound overlapping support and give stronger weight to tracking when it shows clear control. A restart tagged `N/A` provides timing context. |
 
+The second graded block begins before kickoff. For a graded prefix with an automatic opening
+kickoff tag, estimate the transition to live play from sustained ball motion near midfield.
+If the motion cue is absent, use the opening of the tag window. [Organizer FAQ](https://github.com/metrica-sports/more-than-a-hack-2027/blob/f8f2629/FAQ.md)
+
 Viterbi decoding adds a cost to each state change. Strong control reduces the cost of a team
 handover, while evidence of an exit or a restart reduces the cost of entering or leaving dead
 ball. An isolated touch that produces only weak or short-lived evidence will usually leave the
@@ -25,6 +29,10 @@ current spell intact. After a stoppage, the new team is inferred from control an
 Offline decoding uses evidence on both sides of a candidate boundary without carrying a state
 across halves. The use of ball motion and player configurations is consistent with work on
 tracking-based event detection. [Vidal-Codina et al.](https://arxiv.org/abs/2202.00804)
+
+The 2026 winner, IpurdIAr, used player and ball motion to infer passes and interceptions.
+We carry that tracking feature idea into a model designed around the 2027 possession sequence.
+[Winner's project notes](https://adriaflores.com/projects/soccer-gpt/)
 
 ## Inputs and validation
 
@@ -46,10 +54,10 @@ for a pipeline check after model selection.
 [Data publication](https://doi.org/10.1038/s41597-025-04505-y)
 
 On the two development matches, average possession spell F1 with original observations was
-**0.5085** versus **0.3310** for the nearest-player baseline with a centered ±2 second vote. With
-40.7% of ball positions hidden in seeded contiguous gaps, it was **0.4275** versus **0.2250**.
-The selected turnover penalty is 2.5, the stoppage penalty is 4.0 and the stoppage score bias is
-0.05. [Development comparisons](app/technical%20context/adr/0002-temporal-possession.md)
+**0.5031** versus **0.3310** for the nearest-player baseline with a centered ±2 second vote. With
+40.7% of ball positions hidden in seeded contiguous gaps, it was **0.4219** versus **0.2250**.
+The selected turnover penalty is 2.5, the stoppage penalty is 4.0 and the evidence-gated
+stoppage score bias is 0.05. [Development comparisons](app/technical%20context/adr/0002-temporal-possession.md)
 
 ## Limitations
 

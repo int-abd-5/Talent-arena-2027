@@ -15,6 +15,13 @@ uses one window for live changes and real stoppages. The decoder adds an explici
 state and reduces it when the observations support the new state. This targets the whole spell and
 lets the offline path place a boundary near supporting evidence.
 
+Multiply the stoppage bias by observed support for a stoppage. The initial additive bias could
+turn a long gap with no signal into a spurious dead segment. Reduce the live offset with ball
+visibility as well, so an unobserved interval can preserve either preceding state. An automatic
+opening kickoff tag can identify a graded prefix before play. Find sustained movement near
+the centre when tracking supports it, and otherwise use the beginning of the supplied window.
+[Organizer FAQ](https://github.com/metrica-sports/more-than-a-hack-2027/blob/f8f2629/FAQ.md)
+
 ## Selection protocol
 
 Use the organizer's spell F1 on two development matches from the public DFL IDSSE data, with
@@ -25,18 +32,18 @@ the tag adapter and semantics. [Benchmark recipe and provenance](../../tools/DFL
 
 | Turnover penalty | Stoppage penalty | Stoppage bias | Mean spellF1 with original tracks | Mean spellF1 with masked ball |
 |---:|---:|---:|---:|---:|
-| 8.0 | 6.0 | 0.00 | 0.4644 | 0.3552 |
-| 6.0 | 6.0 | 0.00 | 0.4798 | 0.3659 |
-| 4.0 | 6.0 | 0.00 | 0.4912 | 0.3884 |
-| 2.5 | 6.0 | 0.00 | 0.5011 | 0.4184 |
-| 4.0 | 4.0 | 0.05 | 0.4977 | 0.4009 |
-| **2.5** | **4.0** | **0.05** | **0.5085** | **0.4275** |
+| 8.0 | 6.0 | 0.00 | 0.4644 | 0.3577 |
+| 6.0 | 6.0 | 0.00 | 0.4798 | 0.3684 |
+| 4.0 | 6.0 | 0.00 | 0.4912 | 0.3914 |
+| 2.5 | 6.0 | 0.00 | 0.5011 | 0.4203 |
+| 4.0 | 4.0 | 0.05 | 0.4932 | 0.3945 |
+| **2.5** | **4.0** | **0.05** | **0.5031** | **0.4219** |
 | Nearest player, ±2 s vote | — | — | 0.3310 | 0.2250 |
 
-The initial penalties merged too many distinct spells in the development data. Reducing the turnover
-penalty improved spell matches. The last row with decoder settings combines the best turnover
-setting with the stoppage settings and is the chosen configuration. The five-minute competition
-reference plays no role in this comparison.
+The initial penalties merged too many distinct spells in development. Reducing the turnover
+penalty improved spell matches. After the gap fix, the combined configuration led both
+conditions, by a small margin over the same turnover penalty with the original stoppage
+settings. The five-minute competition reference plays no role in this comparison.
 
 ## Consequences
 

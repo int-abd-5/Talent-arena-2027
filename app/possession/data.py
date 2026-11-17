@@ -45,6 +45,7 @@ class TagEvidence:
     phase_bias: NDArray[np.float32]
     restart_hint: NDArray[np.float32]
     restart_bias: NDArray[np.float32]
+    opening_windows: tuple[tuple[int, int], ...]
 
 
 def read_tracking(metadata: Path, tracking: Path, n_frames: int) -> Tracking:
@@ -96,6 +97,7 @@ def read_tags(path: Path, n_frames: int, fps: float) -> TagEvidence:
     phases = np.zeros((2, n_frames), dtype=np.float32)
     restarts = np.zeros(n_frames, dtype=np.float32)
     restart_teams = np.zeros((2, n_frames), dtype=np.float32)
+    opening_windows = []
     events = ET.parse(path).getroot().iter("instance")
     fade_frames = max(1, round(0.5 * fps))
     for event in events:
@@ -110,17 +112,17 @@ def read_tags(path: Path, n_frames: int, fps: float) -> TagEvidence:
         end = min(n_frames, round(end_s * fps))
         if end <= start:
             continue
-        team = next(
-            (
-                (label.findtext("text") or "").strip().casefold()
-                for label in event.findall("label")
-                if (label.findtext("group") or "").strip().casefold() == "team"
-            ),
-            "",
-        )
-        sign = TEAM_SIGN.get(team, 0)
+        labels = {
+            (label.findtext("group") or "").strip().casefold(): (label.findtext("text") or "")
+            .strip()
+            .casefold()
+            for label in event.findall("label")
+        }
+        sign = TEAM_SIGN.get(labels.get("team", ""), 0)
         fade = _fade(end - start, fade_frames)
         if code == "SET PIECES":
+            if labels.get("type") == "kick off (start)":
+                opening_windows.append((start, end))
             target = restarts[start:end]
             np.maximum(target, fade, out=target)
             if sign:
@@ -130,4 +132,9 @@ def read_tags(path: Path, n_frames: int, fps: float) -> TagEvidence:
             weight = sign * PHASE_WEIGHT[code]
             target = phases[int(weight < 0), start:end]
             np.maximum(target, abs(weight) * fade, out=target)
-    return TagEvidence(phases[0] - phases[1], restarts, restart_teams[0] - restart_teams[1])
+    return TagEvidence(
+        phases[0] - phases[1],
+        restarts,
+        restart_teams[0] - restart_teams[1],
+        tuple(sorted(opening_windows)),
+    )

@@ -11,6 +11,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .data import ATD_METADATA, ATD_TRACKING, SMART_TAGGING, read_tags, read_tracking
+from .features import opening_frame
 from .model import predict_half
 
 
@@ -53,7 +54,17 @@ def generate(data_dir: Path, output: Path, layout: MatchLayout = TACTICAL) -> No
     tracking = read_tracking(tactical / ATD_METADATA, tactical / ATD_TRACKING, layout.n_frames)
     tags = read_tags(tactical / SMART_TAGGING, layout.n_frames, layout.fps)
     labels = np.full(layout.n_frames, "X")
-    for half in layout.halves:
+    for graded in layout.halves:
+        start = opening_frame(
+            tracking.ball_xy,
+            tags.opening_windows,
+            graded.start,
+            graded.stop,
+            layout.pitch,
+            layout.fps,
+        )
+        labels[graded.start : start] = "D"
+        half = slice(start, graded.stop)
         labels[half] = predict_half(
             tracking.player_xy[half],
             tracking.ball_xy[half],
