@@ -1,34 +1,29 @@
-# ADR-0001: Stack and toolchain
+# ADR-0001 | Python and NumPy on CPU
 
-- **Status**: proposed
-- **Date**: 2026-11-17
-- **Deciders**: Mohib
-- **Supersedes**: none
+**Status** Accepted for the qualifier on 17 November 2026.
 
 ## Context
 
-MTAH 2027 Possession needs a reproducible workspace and a verification pipeline before any product code,
-because every later quality claim rests on checks that run unattended. The scaffold chose a default so
-B0 could start; this record states it, so it can be challenged rather than inherited.
+The reference repository exposes Python loaders and a NumPy and pandas scorer. The tactical
+bundle is small as numeric tracking but includes two large videos. Organizers need an inspectable
+one-command reconstruction of the CSV.
 
 ## Decision
 
-Not yet chosen. B0's first task is to choose the language, runtime, type and lint tooling, test runner,
-coverage tool and CI, and to replace this section with the decision. Until then no product code is written.
-- **Persistence, hosting, model providers and other vendors:** not chosen. Each is its own ADR when it is
-  needed, with a revisit trigger.
+Use Python 3.12.14 and one runtime library, NumPy, pinned by `uv.lock`. Read the tracking file
+line by line into compact float32 arrays and infer one tactical half at a time. Use Ruff, mypy,
+pytest and coverage for the reproducible local gate. Keep pandas in the development group for the
+organizer's scorer, and run the pinned runtime dependency audit separately. The GitHub workflow
+runs the same local commands using synthetic inputs.
 
-## Alternatives considered
+## Alternatives
 
-Fill in as the decision is challenged. At minimum record the runtime and test-tool alternatives that were
-proposed and why they lost, so they are not reintroduced by accident.
-
-## Consequences
-
-Strict types and a single formatter make early work slower and later refactors cheaper. Running a fresh
-checkout's full check becomes a milestone gate. The cost is a pinned toolchain that must be bumped on purpose.
+The scaffold's TypeScript stack would need a second environment for the organizer's tools and
+duplicate numeric helpers. A full computer vision stack would enlarge the runtime and depend on
+decoding or detector throughput. A notebook would assist exploration but add a second execution
+path to reproduce. The CLI keeps one run command and no network requirement during inference.
 
 ## Revisit trigger
 
-Reopen when the full local check exceeds ninety seconds on the owner's machine, when a required library
-no longer supports the pinned runtime, or when the owner decides the product needs a stack this one cannot host.
+Revisit if decoded video features show measured improvement on permitted other games or if a
+new target competition requires streaming inference. Keep the synthetic and official format checks.

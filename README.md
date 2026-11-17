@@ -1,32 +1,41 @@
-# MTAH 2027 Possession
+# STAR STRUCK | More Than A Hack 2027
 
-Estimate team possession and stoppages from tactical tracking for the More Than A Hack 2027 qualifier.
+Generate the team's Phase 1 possession CSV from the local tactical dataset. The CLI uses Python and
+NumPy and runs on a CPU. The organizer's Git repository supplies the reference validator and scorer.
+See the [technical report](TECHNICAL_REPORT.md) for the method and results.
 
-## What is here
+## Reproduce the submission
 
-| Path | What it is | Who owns it |
-|---|---|---|
-| `business/` | Current direction on one page, plus numbered detail and `research/`. | Mohib |
-| `product context/` | The product truth. **Not the agent's to rewrite.** | Mohib |
-| `team/` | One folder per role agent, each with its own job description. | Mohib |
-| `app/` | Everything engineering: the toolchain, `CONSTRAINTS.md` and the folders below. | Engineering |
-| `app/technical context/` | Numbered specifications, `adr/`, `reviews/`, `workflows/`, `BUILD_PROGRESS.md`. | Engineering |
-| `app/memory/` | Project memory chunked by topic. `SESSIONS.md` is the time axis. | Engineering |
-| `app/tools/` | Build-time packages. Never ship. `app/tools/README.md` is the maintainer's guide. | Engineering |
-| `app/packages/` | Runtime packages. | Engineering |
-| `.claude/skills/`, `.agents/skills/` | Agent skills (`save-point`). | Engineering |
-| `.githooks/` | Commit-identity and attribution gates; `core.hooksPath` points here. | Mohib |
+Start from this repository's root with Python 3.12.14 and [uv](https://docs.astral.sh/uv/). Put the
+provided tactical assets under any local dataset root:
 
-Read `app/memory/SESSIONS.md` when resuming, `app/memory/INDEX.md` when learning the project, and
-`app/technical context/01_EXECUTION_CONTRACT.md` before writing code.
+```text
+data/
+└── tactical/
+    ├── BAR-ATH_tactical_atd.txt
+    ├── BAR-ATH_tactical_atd.xml
+    └── BAR-ATH_tactical_smart_tagging.xml
+```
 
-## Running the checks
+```sh
+uv sync --locked
+uv run --locked python -m app.possession --data-dir data --output 'outputs/STAR STRUCK.csv'
+```
 
-See [CONSTRAINTS](app/CONSTRAINTS.md) for the bar and for the command behind every row. The one
-command that runs the unattended gates, cheapest first, is `npm run check` from `app/`.
+With the arranged dataset in a sibling organizer clone, use `--data-dir '../more-than-a-hack-2027/data'`.
+The command also accepts `MTAH_DATA_DIR` when `--data-dir` is omitted.
 
-## Commits
+From this repository, run the official validator with the same Python environment and a sibling clone
+of the organizer repository at the inspected revision `f8f2629`:
 
-Every commit shows `Mozenjii <mhbamdm@gmail.com>` as author and committer and carries no AI
-attribution. The hooks in `.githooks/` enforce it; run `git config core.hooksPath .githooks` once in a
-fresh clone.
+```sh
+uv run --locked python ../more-than-a-hack-2027/evaluation/validate_submission.py 'outputs/STAR STRUCK.csv'
+```
+
+The reproduction command needs only the three files above. The [public DFL benchmark](app/tools/DFL_BENCHMARK.md)
+is available separately for external replication. `make check` runs synthetic coverage, repository
+checks, formatting, lint and types. `make audit` checks locked runtime dependencies.
+
+Keep the match files, working exports and possession CSVs in ignored local folders. The organizer
+accepts the named CSV, a public source repository URL, and the named technical report through its
+participant form. [Submission instructions](https://github.com/metrica-sports/more-than-a-hack-2027/blob/f8f2629/SUBMISSION.md)
